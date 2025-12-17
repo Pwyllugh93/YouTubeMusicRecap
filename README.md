@@ -1,73 +1,156 @@
-# React + TypeScript + Vite
+# YouTube Music Recap (Local App)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A **local-first YouTube Music recap dashboard** built with **React + Node.js**.  
+It analyzes your **Google Takeout YouTube Music watch history JSON** and generates
+a visual recap similar to Spotify Wrapped — without uploading your data anywhere.
 
-Currently, two official plugins are available:
+All processing happens **entirely on your machine**.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Listening overview
 
-## Expanding the ESLint configuration
+- Total plays
+- Date range (first → last play)
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Charts
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- **Top Artists** (bar chart)
+- **Top Songs** (bar chart)
+- **Plays by Month** (bar chart)
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Lists
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- **Bottom Artists** (least-played)
+- **Bottom Songs** (least-played)
+
+### Design
+
+- Responsive dashboard layout
+- Cards automatically align side-by-side on large screens
+- Clean, modern UI
+- Handles large JSON files efficiently
+
+---
+
+## Tech Stack
+
+### Frontend
+
+- React (Vite)
+- TypeScript
+- Recharts
+- CSS Grid (responsive layout)
+
+### Backend
+
+- Node.js
+- Express
+- Reads JSON directly from disk (no browser memory issues)
+
+---
+
+## Project Structure
+
+ytm-recap/
+├─ data/
+│ └─ music-history.json # your Google Takeout file
+├─ server/
+│ └─ index.js # Express backend
+├─ src/
+│ ├─ api.ts # API + types
+│ ├─ App.tsx # dashboard UI
+│ ├─ App.css # styling
+│ └─ main.tsx
+├─ index.css # global styles (important!)
+├─ package.json
+└─ README.md
+
+---
+
+## Getting Your Data
+
+1. Go to **Google Takeout**
+2. Select **YouTube and YouTube Music**
+3. Export **watch history**
+4. Locate the YouTube Music history JSON
+5. Place it here:
+   data/music-history.json
+
+The file is usually an **array of objects**.
+
+---
+
+## Installation
+
+### Requirements
+
+- Node.js (18+ recommended)
+- npm
+
+### Install dependencies
+
+```bash
+npm install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Running the App
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Development mode (frontend + backend together)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run dev
 ```
+
+This starts:
+
+Frontend: http://localhost:5173
+
+Backend API: http://localhost:5174/api/recap
+
+### Important Setup Note (Vite default fix)
+
+Make sure src/index.css does NOT restrict width.
+
+Your index.css should contain:
+
+#root {
+width: 100%;
+margin: 0;
+padding: 0;
+}
+
+body {
+margin: 0;
+}
+
+If this is missing, the dashboard will not expand to full width.
+
+#### What the Backend computes (with a few redundancies)
+
+From your history file, the backend derives:
+
+- Total play count
+- Date range
+- Top artists
+- Top songs
+- Bottom artists
+- Bottom songs
+- Monthly listening counts
+- Hourly and weekday distributions (optional extensions)
+
+All aggregation is done server-side to handle large files efficiently.
+
+#### Notes on Accuracy
+
+YouTube Takeout does not include track durations.
+
+“Plays” are inferred from watch history entries.
+
+Bottom artists/songs typically represent items played only once.
+
+#### License
+
+MIT
